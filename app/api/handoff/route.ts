@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import JSZip from 'jszip'
-import { toSrt, sampleCaptions } from '../../../../lib/edl/captions'
+import { toSrt, sampleCaptions } from '../../../lib/edl/captions'
 
 export async function GET(){
   const zip = new JSZip()
