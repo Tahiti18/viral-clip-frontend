@@ -97,3 +97,8 @@ export function deleteJob(id: string) {
 export function listPlans() {
   return request<Plan[]>('/api/plans');
 }
+// --- compat shim for existing pages ---
+export function getJSON<T = any>(path: string): Promise<T> {
+  // your request() already defaults to GET
+  return request<T>(path);
+}
