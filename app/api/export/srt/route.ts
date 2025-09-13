@@ -1,3 +1,7 @@
-import { NextRequest } from "next/server"; import { Timeline } from "@/lib/edl/types"; import { captionsToSrt } from "@/lib/edl/captions";
-export async function POST(req: NextRequest){ const tl = await req.json() as Timeline; const srt = captionsToSrt(tl.captions || []);
-  return new Response(srt, { headers: { "Content-Type":"application/x-subrip; charset=utf-8", "Content-Disposition": `attachment; filename="${tl.title.replace(/\W+/g,'_')}.srt"` } }); }
+
+import { NextResponse } from "next/server";
+import { toSrt } from "@/lib/edl/captions";
+export async function GET(){
+  const srt = toSrt([ {start:0,end:2.5,text:"Hello world"}, {start:2.5,end:5,text:"This is a caption"} ]);
+  return new NextResponse(srt,{ headers:{ "Content-Type":"text/plain; charset=utf-8", "Content-Disposition":"attachment; filename=subtitles.srt" }});
+}
