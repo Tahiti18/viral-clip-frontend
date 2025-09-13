@@ -1,8 +1,35 @@
+// lib/edl/captions.ts
 
-export type Caption = { start: number; end: number; text: string };
-function pad(n:number,l=2){return String(n).padStart(l,'0')}
-function toSrtTime(sec:number){ const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=Math.floor(sec%60), ms=Math.round((sec%1)*1000); return `${pad(h)}:${pad(m)}:${pad(s)},${String(ms).padStart(3,'0')}`}
-function toVttTime(sec:number){ const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=Math.floor(sec%60), ms=Math.round((sec%1)*1000); return `${pad(h)}:${pad(m)}:${pad(s)}.${String(ms).padStart(3,'0')}`}
-export function toSrt(caps: Caption[]): string { return caps.map((c,i)=>`${i+1}\n${toSrtTime(c.start)} --> ${toSrtTime(c.end)}\n${c.text}\n`).join("\n") }
-export function toVtt(caps: Caption[]): string { const body=caps.map(c=>`${toVttTime(c.start)} --> ${toVttTime(c.end)}\n${c.text}\n`).join("\n"); return `WEBVTT\n\n${body}` }
-export function sampleCaptions(): Caption[]{ return [ {start:0,end:2.3,text:"Welcome to UnityLab"}, {start:2.3,end:5.0,text:"This is a sample caption"} ] }
+export type Caption = {
+  startMs: number;   // start time in milliseconds
+  endMs: number;     // end time in milliseconds
+  text: string;
+};
+
+export function sampleCaptions(): Caption[] {
+  return [
+    { startMs: 0,        endMs: 2000,   text: 'Hello' },
+    { startMs: 2000,     endMs: 4000,   text: 'from UnityLab' },
+    { startMs: 4000,     endMs: 6000,   text: 'handoff package' }
+  ];
+}
+
+// Convert ms → "hh:mm:ss,mmm"
+function toSrtTime(ms: number): string {
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const ms3 = ms % 1000;
+  const pad = (n: number, w = 2) => String(n).padStart(w, '0');
+  return `${pad(h)}:${pad(m)}:${pad(s)},${pad(ms3, 3)}`;
+}
+
+export function toSrt(items: Caption[]): string {
+  return items
+    .map((c, i) => {
+      const start = toSrtTime(c.startMs);
+      const end = toSrtTime(c.endMs);
+      return `${i + 1}\n${start} --> ${end}\n${c.text}\n`;
+    })
+    .join('\n');
+}
