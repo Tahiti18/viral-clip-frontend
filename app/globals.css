@@ -1,5 +1,8 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-:root{color-scheme:dark}
-a{text-decoration:none}
+
+:root { --bg: #0b0b0c; --fg: #e6e7ea; }
+html, body { background: var(--bg); color: var(--fg); }
+h1 { @apply text-2xl font-bold mb-4; }
