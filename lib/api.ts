@@ -1,21 +1,99 @@
+// lib/api.ts
+// Single place to call your backend with robust error handling.
 
-const RAW = (process.env.NEXT_PUBLIC_API_BASE || "").trim();
-export const API_BASE = RAW.replace(/\/+$/, "");
-
-function buildUrl(path: string) { if(!path.startsWith("/")) path = "/" + path; return `${API_BASE}${path}`; }
-
-async function request(method: string, path: string, body?: any) {
-  const controller = new AbortController(); const id = setTimeout(()=>controller.abort(), 20000);
-  const init: RequestInit = { method, signal: controller.signal, headers: { "Accept":"application/json" } };
-  if(body !== undefined){ (init.headers as any)["Content-Type"]="application/json"; init.body = JSON.stringify(body); }
-  const res = await fetch(buildUrl(path), init).catch((e)=>{clearTimeout(id); throw new Error(`Network: ${e?.message||e}`)});
-  clearTimeout(id);
-  if(!res.ok){ const text = await res.text().catch(()=>res.statusText); throw new Error(`HTTP ${res.status}: ${text}`); }
-  const ct = res.headers.get("content-type") || "";
-  if(ct.includes("application/json")) return res.json();
-  return res.text();
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
+if (!API_BASE) {
+  // Fail early during build if the env var is missing
+  throw new Error('NEXT_PUBLIC_API_BASE is not set');
 }
 
-export const getJSON = <T=any>(path: string) => request("GET", path) as Promise<T>;
-export const postJSON = <T=any>(path: string, body: any) => request("POST", path, body) as Promise<T>;
-export async function healthCheck(): Promise<boolean>{ try{ const r = await getJSON<{ok:boolean}>("/api/health"); return !!r?.ok }catch{ return false } }
+export type Plan = {
+  id: string;
+  lane: number;
+  max_input_minutes: number;
+  target_multiplier: number;
+  credit_multiplier: number;
+};
+
+export type Job = {
+  id: string;
+  org_id: string;
+  source_url: string;
+  input_minutes: number;
+  plan_id: string;
+  lane: number;
+  priority_score: number;
+  state: string;
+  created_at: string;   // ISO
+  updated_at: string;   // ISO
+  eta_seconds?: number | null;
+  idempotency_key?: string | null;
+};
+
+export type NewJob = {
+  org_id: string;
+  source_url: string;
+  input_minutes: number;
+  plan_id: string;
+};
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers || {}),
+    },
+    // Next.js: opt into SSR caching semantics where appropriate; default no-cache
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    const msg = `API ${res.status} ${res.statusText} for ${path}${text ? `: ${text}` : ''}`;
+    throw new Error(msg);
+  }
+  // Gracefully handle empty bodies
+  const ct = res.headers.get('content-type') || '';
+  if (!ct.includes('application/json')) {
+    // @ts-ignore – allow non-JSON replies (e.g., empty arrays from FastAPI returning [])
+    return (await res.text()) as unknown as T;
+  }
+  return res.json() as Promise<T>;
+}
+
+/** Health check */
+export function apiHealth() {
+  return request<{ status: string } | string>('/health');
+}
+
+/** List jobs */
+export function listJobs() {
+  // Adjust the path if your FastAPI routes use a prefix (e.g. /api/jobs).
+  return request<Job[]>('/api/jobs');
+}
+
+/** Create a new job */
+export function createJob(payload: NewJob) {
+  return request<Job>('/api/jobs', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+/** Get a single job */
+export function getJob(id: string) {
+  return request<Job>(`/api/jobs/${encodeURIComponent(id)}`);
+}
+
+/** Cancel / delete a job (if your API supports it) */
+export function deleteJob(id: string) {
+  return request<{ ok: true }>(`/api/jobs/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
+}
+
+/** List plans (used by the job form) */
+export function listPlans() {
+  return request<Plan[]>('/api/plans');
+}
