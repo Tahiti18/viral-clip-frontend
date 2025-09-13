@@ -1,9 +1,12 @@
 
 import { NextResponse } from 'next/server'
 import JSZip from 'jszip'
+import { toSrt, sampleCaptions } from '../../../../lib/edl/captions'
 export async function GET(){
-  const zip=new JSZip(); zip.file('captions.srt','1\n00:00:00,000 --> 00:00:02,000\nHello!\n')
-  const bytes=await zip.generateAsync({type:'uint8array'})
-  // Buffer exists in Node 18 runtime
-  return new NextResponse(Buffer.from(bytes),{headers:{'Content-Type':'application/zip','Content-Disposition':'attachment; filename=handoff.zip'}})
+  const zip = new JSZip()
+  const srt = toSrt(sampleCaptions())
+  zip.file('README.txt','UnityLab editor handoff')
+  zip.file('captions.srt', srt)
+  const bytes = await zip.generateAsync({type:'uint8array'})
+  return new NextResponse(Buffer.from(bytes), { headers:{ 'Content-Type':'application/zip', 'Content-Disposition':'attachment; filename="handoff.zip"' } })
 }
