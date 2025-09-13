@@ -1,3 +1,10 @@
-import { NextRequest } from "next/server"; import { generateCapcutJson_TEMPORARY } from "@/lib/edl/generateCapcutJson"; import { Timeline } from "@/lib/edl/types";
-export async function POST(req: NextRequest){ const tl = await req.json() as Timeline; const json = generateCapcutJson_TEMPORARY(tl);
-  return new Response(json, { headers: { "Content-Type":"application/json; charset=utf-8", "Content-Disposition": `attachment; filename="${tl.title.replace(/\W+/g,'_')}.capcut.json"` } }); }
+import { NextResponse } from "next/server";
+import { generateCapcutJson } from "@/lib/edl/generateCapcutJson";
+
+export async function GET() {
+  const json = generateCapcutJson("ViralClip", [
+    { id: "a", start: 0, end: 5, text: "Intro" },
+    { id: "b", start: 5, end: 12, text: "Body" }
+  ]);
+  return NextResponse.json(json);
+}
