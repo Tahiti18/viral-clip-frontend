@@ -1,3 +1,1 @@
-export default function JobStreamPanel() {
-  return <div>JobStreamPanel placeholder</div>;
-}
+export default function JobStreamPanel(){return <div>JobStreamPanel placeholder</div>}

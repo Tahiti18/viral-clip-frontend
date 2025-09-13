@@ -1,3 +1,1 @@
-export default function QueueWidget() {
-  return <div>QueueWidget placeholder</div>;
-}
+export default function QueueWidget(){return <div>QueueWidget placeholder</div>}
