@@ -1,28 +1,30 @@
-// app/api/handoff/route.ts
-import { NextResponse } from 'next/server'
-import JSZip from 'jszip'
-import { toSrt, sampleCaptions } from '../../../../lib/edl/captions'
+import { NextResponse } from "next/server";
+import JSZip from "jszip";
+import { toSrt, sampleCaptions } from "@/lib/edl/captions";
 
-// Make sure this runs on Node (Netlify supports this)
-export const runtime = 'nodejs'
-
+/**
+ * Returns a ZIP with:
+ *  - README.txt
+ *  - captions.srt (generated from sampleCaptions)
+ *
+ * We return an ArrayBuffer to satisfy BodyInit under strict TS config.
+ */
 export async function GET() {
-  const zip = new JSZip()
+  const zip = new JSZip();
+  const srt = toSrt(sampleCaptions());
+  zip.file("README.txt", "UnityLab editor handoff");
+  zip.file("captions.srt", srt);
 
-  // package contents
-  zip.file('README.txt', 'UnityLab editor handoff')
-  zip.file('captions.srt', toSrt(sampleCaptions()))
+  const bytes = await zip.generateAsync({ type: "uint8array" });
 
-  // Get a Uint8Array from JSZip…
-  const u8 = await zip.generateAsync({ type: 'uint8array' })
-
-  // …then hand NextResponse an ArrayBuffer (which BodyInit accepts)
-  const ab = u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength)
+  // Ensure we pass an ArrayBuffer of the exact view range:
+  const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
 
   return new NextResponse(ab, {
     headers: {
-      'Content-Type': 'application/zip',
-      'Content-Disposition': 'attachment; filename="handoff.zip"'
+      "Content-Type": "application/zip",
+      "Content-Disposition": 'attachment; filename="handoff.zip"',
+      "Cache-Control": "no-store"
     }
-  })
+  });
 }
