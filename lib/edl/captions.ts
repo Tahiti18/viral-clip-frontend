@@ -1,20 +1,14 @@
 // lib/edl/captions.ts
-
-export type Caption = {
-  startMs: number;   // start time in milliseconds
-  endMs: number;     // end time in milliseconds
-  text: string;
-};
+export type Caption = { startMs: number; endMs: number; text: string };
 
 export function sampleCaptions(): Caption[] {
   return [
-    { startMs: 0,        endMs: 2000,   text: 'Hello' },
-    { startMs: 2000,     endMs: 4000,   text: 'from UnityLab' },
-    { startMs: 4000,     endMs: 6000,   text: 'handoff package' }
+    { startMs: 0, endMs: 2000, text: 'Hello' },
+    { startMs: 2000, endMs: 4000, text: 'from UnityLab' },
+    { startMs: 4000, endMs: 6000, text: 'handoff package' },
   ];
 }
 
-// Convert ms → "hh:mm:ss,mmm"
 function toSrtTime(ms: number): string {
   const h = Math.floor(ms / 3600000);
   const m = Math.floor((ms % 3600000) / 60000);
@@ -26,10 +20,10 @@ function toSrtTime(ms: number): string {
 
 export function toSrt(items: Caption[]): string {
   return items
-    .map((c, i) => {
-      const start = toSrtTime(c.startMs);
-      const end = toSrtTime(c.endMs);
-      return `${i + 1}\n${start} --> ${end}\n${c.text}\n`;
-    })
+    .map((c, i) => `${i + 1}
+${toSrtTime(c.startMs)} --> ${toSrtTime(c.endMs)}
+${c.text}
+
+`)
     .join('\n');
 }
