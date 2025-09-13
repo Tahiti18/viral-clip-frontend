@@ -1,6 +1,5 @@
-// app/api/export/vtt/route.ts
 import { NextResponse } from 'next/server'
-import { toVtt, sampleCaptions } from '../../../lib/edl/captions'
+import { toVtt, sampleCaptions } from '../../../../lib/edl/captions'
 
 export async function GET() {
   const vtt = toVtt(sampleCaptions())
