@@ -1,1 +1,1 @@
-export default function generatePremiereXml(){return {ok:true,type:"premiere"}}
+export default function generatePremiereXml(){return {ok:true,type:'premiere'}}

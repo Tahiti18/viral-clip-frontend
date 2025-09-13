@@ -1,10 +1,9 @@
 
-import { getJSON } from '@/lib/api'
+import { getJSON } from '../../lib/api'
 type T = { id:string; name:string; category?:string }
 export default async function Templates(){
   let templates:T[]=[]; try{ templates = await getJSON('/api/templates') } catch {}
-  return (<main>
-    <h1>Templates</h1>
+  return (<main><h1>Templates</h1>
     <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
       {templates.length? templates.map(t=>(
         <div key={t.id} className="card">
@@ -16,6 +15,5 @@ export default async function Templates(){
           </form>
         </div>
       )): <div className="text-sm text-zinc-400">No templates</div>}
-    </div>
-  </main>)
+    </div></main>)
 }

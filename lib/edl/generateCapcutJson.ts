@@ -1,1 +1,1 @@
-export default function generateCapcutJson(){return {ok:true,type:"capcut"}}
+export default function generateCapcutJson(){return {ok:true,type:'capcut'}}

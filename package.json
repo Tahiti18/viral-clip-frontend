@@ -1,14 +1,9 @@
 
 {
   "name": "viral-clip-frontend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
+  "scripts": { "dev": "next dev", "build": "next build", "start": "next start" },
   "dependencies": {
     "jszip": "^3.10.1",
     "next": "14.2.5",

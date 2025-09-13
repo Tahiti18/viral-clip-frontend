@@ -1,1 +1,1 @@
-export default function captions(){return ["stub caption"]}
+export default function captions(){return ['stub caption']}

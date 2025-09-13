@@ -1,1 +1,1 @@
-export default function generateFcpxml(){return {ok:true,type:"fcpxml"}}
+export default function generateFcpxml(){return {ok:true,type:'fcpxml'}}
